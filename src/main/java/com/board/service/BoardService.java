@@ -38,7 +38,7 @@ public class BoardService {
         this.boardMapper = boardMapper; // @Mapper로 빈 등록 (MyBatis)
         this.passwordEncoder = passwordEncoder; // @Bean으로 빈 등록
         allowedExtList = Arrays.stream(allowedExt.split(",")).collect(Collectors.toSet());
-        // Set : 해시로 바로 찾아서 빠름, 중복 제거
+        // Set : 해시로 바로 찾아서 빠름, 중복 제거 -> 건수 많을때 고민
     }
 
     /**
@@ -69,7 +69,7 @@ public class BoardService {
         BoardDetailViewVO boardDetailViewVO = new BoardDetailViewVO();
 
         BoardVO boardVO = boardMapper.selectBoard(boardId);
-        if(boardVO == null){
+        if(boardVO == null){ // TODO : optional로 null 체크
             throw new NotFoundException("존재하지 않는 게시글입니다.");
         }
         List<ReplyVO> replyList = boardMapper.selectReplyList(boardId);
@@ -93,7 +93,8 @@ public class BoardService {
      */
     @Transactional
     public void registerBoard(BoardVO board, List<MultipartFile> attachmentList) throws IOException {
-
+        // TODO : 유효성 검사 -> 어노테이션 활용 (서비스에도 도달하지 못하게)
+        // 유효성 검사에 로직이 들어가면 서비스에서 하는데 아니면 앞단에서
         // 유효성 : 작성자, 비밀번호, 제목, 내용
         boolean isInvalid =
                 isBlank(board.getCreateUser()) ||
@@ -136,6 +137,9 @@ public class BoardService {
         // 비밀번호 해시 비교
         if(!passwordEncoder.matches(deleteBoardVO.getPasswordInput(), password)){ // 비밀번호 틀렸을 경우
             //  matches(평문, 해시) => 해시 안 salt를 꺼내 사용해서 평문을 해싱 후 비교
+            // TODO : 해싱값 다른데서 읽어서 확인이 가능한지 (salt 이용해서)
+            // 대칭키, 비대칭키 : 같은 키를 가지고 암복호화 하는지
+            // 복호화 가능 여부 : 키만 있으면 가능하다
             throw new ValidationException("비밀번호가 틀렸습니다.");
         }
 
@@ -171,6 +175,8 @@ public class BoardService {
      * @return BoardModifyVO
      */
     public BoardModifyVO getModifyBoardById(String boardId) {
+        // TODO : getDetailBoardById. 조회 수 증가를 컨트롤러에서 할 수도 (누구의 책임)
+        // 단일 책임 원칙
         BoardModifyVO boardModifyVO = new BoardModifyVO();
 
         boardModifyVO.setBoard(boardMapper.selectBoard(boardId));
@@ -261,6 +267,7 @@ public class BoardService {
                     ? originalName.substring(originalName.lastIndexOf(".") + 1).toLowerCase()
                     : "";
             if(!allowedExtList.contains(ext)) throw new ValidationException("허용되지 않는 파일 형식입니다."); // 메서드 전달 인자 부적절
+            // TODO : 첨부 하나만 실패할 경우 생각
             String saveName = UUID.randomUUID() + "." + ext; // 중복 방지 + 난독화
 
             // 파일 저장 (실제 파일을 디스크에 저장)

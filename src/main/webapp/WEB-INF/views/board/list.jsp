@@ -89,6 +89,7 @@
 		</table>
 		<!-- 페이지네이션 -->
 		<div class="pagination">
+			<!-- TODO : 너무 복잡 추후 변경될 때 해결할 방법 -->
 			<!-- 맨 처음으로 이동 -->
 			<a href="?page=1&startDate=${searchVO.startDate}&endDate=${searchVO.endDate}&categoryId=${searchVO.categoryId}&keyword=${searchVO.keyword}">&lt;&lt;</a>
 			<!-- 앞 페이지로 이동 -->

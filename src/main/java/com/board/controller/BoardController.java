@@ -33,6 +33,21 @@ import java.util.List;
  * 없어도 되는 건 없어야 됨 (소스) => 즉시 삭제 (나중에 보면 어렵)
  * mybatis mapper 이름 => - 케밥케이스 xml
  * css, js, 정적 html => 웹에 노출되는 건 다 케밥케이스
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
+ *
  * 레퍼런스 타입, 프리미티브 타입 => 공부해오기 설명 가능하도록(메모리 사용 영역)
  * 디버깅 요령 : 시나리오 (추정 가설) 여러개 => 검증 (재현이 가능해야함)
  *  - end to end : 영역별로 쪼개서 찾음
@@ -103,7 +118,7 @@ public class BoardController {
         // 페이지네이션 정보
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("pageCount", pageCount);
-        model.addAttribute("pageGroupSize", pageGroupSize);
+        model.addAttribute("pageGroupSize", pageGroupSize); // TODO 서버에서 해야할까
         //model.addAttribute("startPage", startPage);
         //model.addAttribute("endPage", endPage);
 
@@ -148,6 +163,7 @@ public class BoardController {
      */
     @GetMapping("/modify")
     public String viewModifyPage(@RequestParam(required = false) String boardId, Model model){
+        // TODO : required = true
         // 수정 시에는 조회수 미증가
         BoardModifyVO boardModifyVO = service.getModifyBoardById(boardId);
 
@@ -182,7 +198,7 @@ public class BoardController {
 
         // 파일 부분 다운로드
         long contentLength = resource.contentLength();
-
+        // TODO : 서버 out of memory, stack overflow, 파일 다운로드 취약점 -> 카톡 공유 링크 읽기, 스레드. 첨부파일이 스토리지에 있을 경우 (인프라 고려)
         final long CHUNK_SIZE = 1024 * 1024; // 1MB씩 (버퍼 크기)
 
         // Range 헤더 파싱
