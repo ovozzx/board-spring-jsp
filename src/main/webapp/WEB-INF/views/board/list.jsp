@@ -93,6 +93,8 @@
 			<a href="?page=1&startDate=${searchVO.startDate}&endDate=${searchVO.endDate}&categoryId=${searchVO.categoryId}&keyword=${searchVO.keyword}">&lt;&lt;</a>
 			<!-- 앞 페이지로 이동 -->
 			<a href="?page=${currentPage - 1 < 1 ? 1 : currentPage - 1}&startDate=${searchVO.startDate}&endDate=${searchVO.endDate}&categoryId=${searchVO.categoryId}&keyword=${searchVO.keyword}">&lt;</a>
+			<c:set var="startPage" value="${currentPage - (currentPage - 1) mod pageGroupSize}"></c:set>
+			<c:set var="endPage" value="${startPage + pageGroupSize - 1 > pageCount ? pageCount : startPage + pageGroupSize - 1}"></c:set>
 			<c:forEach begin="${startPage}" end="${endPage}" var="i">
 				<a href="?page=${i}&startDate=${searchVO.startDate}&endDate=${searchVO.endDate}&categoryId=${searchVO.categoryId}&keyword=${searchVO.keyword}"
 				   class="${i == currentPage ? 'active' : ''}">${i}</a>
@@ -102,6 +104,7 @@
 			<!-- 맨 뒤로 이동 -->
 			<a href="?page=${pageCount}&startDate=${searchVO.startDate}&endDate=${searchVO.endDate}&categoryId=${searchVO.categoryId}&keyword=${searchVO.keyword}">&gt;&gt;</a>
 		</div>
+
 		<div class="bottom-bar">
 			<a class="write" href="write">등록</a>
 		</div>

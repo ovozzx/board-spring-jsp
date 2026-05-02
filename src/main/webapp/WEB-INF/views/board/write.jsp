@@ -24,7 +24,7 @@
 		<div class="form-row">
 			<label for="password">비밀번호</label>
 			<input type="password" id="password" name="userPassword" placeholder="비밀번호" class="required" />
-			<input type="password" id="password-confirm"  name="password-confirm" placeholder="비밀번호 확인" class="required" />
+			<input type="password" id="password-confirm"  name="passwordConfirm" placeholder="비밀번호 확인" class="required" />
 			<p id="password-error" class="error-msg" style="display:none;">
 				비밀번호가 일치하지 않습니다.
 			</p>

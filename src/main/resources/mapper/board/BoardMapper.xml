@@ -4,6 +4,27 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.board.mapper.BoardMapper">
+    <!-- 공통 사용 -->
+    <sql id="searchCondition">
+        FROM t_board b
+        INNER JOIN t_category c ON b.category_id = c.category_id
+        WHERE b.is_usable = true
+        <if test="startDate != null and startDate != ''">
+            AND (b.create_date &gt;= #{startDate})
+        </if>
+        <if test="endDate != null and endDate != ''">
+            AND (b.create_date &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)) <!--당일 데이터 포함-->
+        </if>
+        <if test="categoryId != null and categoryId != 0">
+            AND (b.category_id = #{categoryId})
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND
+            (title LIKE CONCAT('%', #{keyword}, '%')
+            OR create_user LIKE CONCAT('%', #{keyword}, '%')
+            OR content LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </sql>
     <!-- TODO : 동적 정렬 조건, 데이터 많을 경우 (정규화, 비정규화 중요)
     비정규화 : 서브쿼리로 하지말고 컬럼으로 가지고 있음. 들여쓰기 -->
     <!-- 목록 조회 -->
@@ -16,51 +37,18 @@
              , b.create_date
              , c.category_name
              , ((SELECT count(*) FROM t_attachment WHERE board_id = b.board_id) > 0) AS has_attachment
-        FROM t_board b
-        INNER JOIN t_category c ON b.category_id = c.category_id
-        WHERE b.is_usable = true
-        <if test="startDate != null and startDate != ''">
-            AND (b.create_date &gt;= #{startDate})
-        </if>
-        <if test="endDate != null and endDate != ''">
-            AND (b.create_date &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)) <!--당일 데이터 포함-->
-        </if>
-        <if test="categoryId != null and categoryId != 0">
-            AND (b.category_id = #{categoryId})
-        </if>
-        <if test="keyword != null and keyword != ''">
-            AND
-            (title LIKE CONCAT('%', #{keyword}, '%')
-            OR create_user LIKE CONCAT('%', #{keyword}, '%')
-            OR content LIKE CONCAT('%', #{keyword}, '%'))
-        </if>
+        <include refid="searchCondition"></include>
         ORDER BY b.board_id DESC
-        LIMIT #{pageSize} OFFSET #{offset}
+        LIMIT #{pageSize} OFFSET #{offset} <!-- offset은 getter에서 계산 -->
         <!-- LIMIT 10 OFFSET 0 : 0번째부터 10개  → 1~10번째 -->
+        <!-- LIMIT 10 OFFSET 10 : 10번째부터 10개 → 11~20번 게시글 -->
     </select>
 
     <!-- TODO : 조건 위 쿼리랑 같을 때 => 중복 최소화 include 쓰기, order 성능 문제  -->
     <!-- 조회된 게시글 전체 개수 -->
     <select id="selectBoardListCount" parameterType="com.board.vo.SearchVO">
         SELECT count(*)
-        FROM t_board b
-        INNER JOIN t_category c ON b.category_id = c.category_id
-        WHERE b.is_usable = true
-        <if test="startDate != null and startDate != ''">
-            AND (b.create_date &gt;= #{startDate})
-        </if>
-        <if test="endDate != null and endDate != ''">
-            AND (b.create_date &lt; DATE_ADD(#{endDate}, INTERVAL 1 DAY)) <!--당일 데이터 포함-->
-        </if>
-        <if test="categoryId != null and categoryId != 0">
-            AND (b.category_id = #{categoryId})
-        </if>
-        <if test="keyword != null and keyword != ''">
-            AND
-            (title LIKE CONCAT('%', #{keyword}, '%')
-            OR create_user LIKE CONCAT('%', #{keyword}, '%')
-            OR content LIKE CONCAT('%', #{keyword}, '%'))
-        </if>
+        <include refid="searchCondition"></include>
     </select>
 
     <!-- 전체 카테고리 읽기 -->
@@ -183,5 +171,25 @@
         , #{fileSize}
         , CURRENT_TIMESTAMP
         , TRUE)
+    </insert>
+
+    <!-- 댓글 등록 -->
+    <insert id="insertReply" parameterType="com.board.vo.ReplyVO">
+        INSERT INTO t_reply
+        (board_id
+        , parent_reply_id
+        , create_user
+        , content
+        , create_date
+        , modify_date
+        , is_usable)
+        VALUES
+            ( #{boardId}
+            , #{parentReplyId}
+            , ''
+            , #{content}
+            , CURRENT_TIMESTAMP
+            , NULL
+            , TRUE)
     </insert>
 </mapper>

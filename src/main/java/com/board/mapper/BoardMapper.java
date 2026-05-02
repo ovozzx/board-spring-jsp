@@ -28,4 +28,6 @@ public interface BoardMapper {
     int updateAttachment(AttachmentVO attachment);
 
     int deleteAttachment(String attachmentId);
+
+    int insertReply(ReplyVO reply);
 }
